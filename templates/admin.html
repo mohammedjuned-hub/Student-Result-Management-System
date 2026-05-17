@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('enter_marks') }}">Enter Marks</a>
+  <a href="{{ url_for('assign_subjects') }}">Assign Subjects</a>
+  <a href="{{ url_for('manage_students') }}">Students</a>
+  <a href="{{ url_for('manage_faculty') }}">Faculty</a>
+  <a href="{{ url_for('admin_change_password') }}">Password</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <h1>Admin Dashboard</h1>
+    <p>System overview and quick actions</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-blue">
+      <div class="stat-label">Total Students</div>
+      <div class="stat-value">{{ student_count }}</div>
+      <div class="stat-sub">Enrolled students</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="stat-label">Faculty Members</div>
+      <div class="stat-value">{{ faculty_count }}</div>
+      <div class="stat-sub">Active faculty</div>
+    </div>
+    <div class="stat-card stat-purple">
+      <div class="stat-label">Result Records</div>
+      <div class="stat-value">{{ result_count }}</div>
+      <div class="stat-sub">Across all semesters</div>
+    </div>
+    <div class="stat-card stat-orange">
+      <div class="stat-label">Subject Assignments</div>
+      <div class="stat-value">{{ subject_count }}</div>
+      <div class="stat-sub">Faculty-subject links</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3>⚡ Quick Actions</h3></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+        <a href="{{ url_for('enter_marks') }}" class="btn btn-primary" style="justify-content:flex-start;padding:18px 20px;">
+          <span style="font-size:1.5rem;">📝</span>
+          <div style="text-align:left">
+            <div style="font-size:.9rem;font-weight:700;">Enter Semester Marks</div>
+            <div style="font-size:.78rem;opacity:.7;font-weight:400;">Add results for students</div>
+          </div>
+        </a>
+        <a href="{{ url_for('assign_subjects') }}" class="btn btn-ghost" style="justify-content:flex-start;padding:18px 20px;">
+          <span style="font-size:1.5rem;">📚</span>
+          <div style="text-align:left">
+            <div style="font-size:.9rem;font-weight:700;">Assign Subjects</div>
+            <div style="font-size:.78rem;opacity:.7;font-weight:400;">Link faculty to subjects</div>
+          </div>
+        </a>
+        <a href="{{ url_for('manage_students') }}" class="btn btn-ghost" style="justify-content:flex-start;padding:18px 20px;">
+          <span style="font-size:1.5rem;">🎓</span>
+          <div style="text-align:left">
+            <div style="font-size:.9rem;font-weight:700;">Manage Students</div>
+            <div style="font-size:.78rem;opacity:.7;font-weight:400;">Add / remove students</div>
+          </div>
+        </a>
+        <a href="{{ url_for('manage_faculty') }}" class="btn btn-ghost" style="justify-content:flex-start;padding:18px 20px;">
+          <span style="font-size:1.5rem;">👨‍🏫</span>
+          <div style="text-align:left">
+            <div style="font-size:.9rem;font-weight:700;">Manage Faculty</div>
+            <div style="font-size:.78rem;opacity:.7;font-weight:400;">Add / remove faculty</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

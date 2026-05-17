@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Class Ranking{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('student_dashboard') }}">Home</a>
+  <a href="{{ url_for('student_mid_marks') }}">MID Marks</a>
+  <a href="{{ url_for('student_results') }}">Results</a>
+  <a href="{{ url_for('student_backlogs') }}">Backlogs</a>
+  <a href="{{ url_for('student_ranking') }}" class="active">Ranking</a>
+  <a href="{{ url_for('backlog_assistant') }}">🤖 AI Assistant</a>
+  <a href="{{ url_for('student_change_password') }}">Password</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <p class="breadcrumb"><a href="{{ url_for('student_dashboard') }}">Home</a> / Ranking</p>
+    <h1>Class Leaderboard</h1>
+    <p>Overall CGPA-based ranking</p>
+  </div>
+
+  {% if leaderboard %}
+  <!-- Top 3 podium -->
+  <div style="display:flex;justify-content:center;gap:16px;margin-bottom:32px;flex-wrap:wrap;">
+    {% for r in leaderboard[:3] %}
+    <div class="stat-card text-center" style="flex:1;min-width:160px;max-width:220px;
+      {% if r.rank == 1 %}border-color:var(--yellow);background:rgba(245,200,66,.05){% elif r.rank == 2 %}border-color:#a0a0b0;background:rgba(160,160,176,.05){% else %}border-color:var(--orange);background:rgba(245,136,74,.05){% endif %}
+      {% if r.hallticket == my_ht %}box-shadow:0 0 0 2px var(--accent){% endif %}">
+      <div style="font-size:2rem;margin-bottom:8px;">
+        {% if r.rank == 1 %}🥇{% elif r.rank == 2 %}🥈{% else %}🥉{% endif %}
+      </div>
+      <div style="font-weight:800;font-size:1rem;">{{ r.name }}</div>
+      <div class="text-mono text-muted text-sm">{{ r.hallticket }}</div>
+      <div style="font-size:1.8rem;font-weight:800;color:{% if r.rank==1 %}var(--yellow){% elif r.rank==2 %}#a0a0b0{% else %}var(--orange){% endif %};margin-top:4px;">
+        {{ r.cgpa }}
+      </div>
+      <div class="text-muted text-sm">CGPA</div>
+      {% if r.hallticket == my_ht %}<div style="font-size:.75rem;color:var(--accent);font-weight:700;margin-top:4px;">← YOU</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>🏆 Full Leaderboard</h3>
+      <span class="text-muted text-sm">{{ leaderboard|length }} students</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Rank</th><th>Hall Ticket</th><th>Student Name</th><th>CGPA</th><th>Progress</th></tr>
+        </thead>
+        <tbody>
+          {% for r in leaderboard %}
+          <tr class="{% if r.hallticket == my_ht %}my-row{% endif %} {% if r.rank <= 3 %}rank-{{ r.rank }}{% endif %}">
+            <td>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;
+                color:{% if r.rank==1 %}var(--yellow){% elif r.rank==2 %}#a0a0b0{% elif r.rank==3 %}var(--orange){% else %}var(--muted){% endif %}">
+                #{{ r.rank }}
+              </span>
+            </td>
+            <td class="text-mono">{{ r.hallticket }}</td>
+            <td>
+              <strong>{{ r.name }}</strong>
+              {% if r.hallticket == my_ht %}<span style="color:var(--accent);font-size:.75rem;margin-left:6px;font-weight:700;">YOU</span>{% endif %}
+            </td>
+            <td class="td-num"><strong>{{ r.cgpa }}</strong> / 10</td>
+            <td style="width:180px">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:{{ (r.cgpa / 10 * 100)|round }}%"></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">🏆</span>
+    <p>No ranking data available yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

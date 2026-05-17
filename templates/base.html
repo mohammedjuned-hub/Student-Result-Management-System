@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}SRMS{% endblock %} · Student Result Management</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+{% block navbar %}
+<nav class="navbar">
+  <div class="nav-inner">
+    <a class="nav-brand" href="/">⚡ SRMS</a>
+    <div class="nav-links">
+      {% block nav_links %}{% endblock %}
+    </div>
+    {% if session.get('user') %}
+    <span class="nav-user">{{ session['user'] }}</span>
+    {% endif %}
+  </div>
+</nav>
+{% endblock %}
+
+{% block content %}{% endblock %}
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

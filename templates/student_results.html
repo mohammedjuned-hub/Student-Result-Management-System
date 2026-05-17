@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Semester Results{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('student_dashboard') }}">Home</a>
+  <a href="{{ url_for('student_mid_marks') }}">MID Marks</a>
+  <a href="{{ url_for('student_results') }}" class="active">Results</a>
+  <a href="{{ url_for('student_backlogs') }}">Backlogs</a>
+  <a href="{{ url_for('student_ranking') }}">Ranking</a>
+  <a href="{{ url_for('backlog_assistant') }}">🤖 AI Assistant</a>
+  <a href="{{ url_for('student_change_password') }}">Password</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header flex flex-between">
+    <div>
+      <p class="breadcrumb"><a href="{{ url_for('student_dashboard') }}">Home</a> / Results</p>
+      <h1>Semester Results</h1>
+      <p>Complete academic record — {{ session.user }}</p>
+    </div>
+    <button class="btn btn-ghost btn-sm no-print" onclick="window.print()">🖨️ Print</button>
+  </div>
+
+  {% if semesters %}
+    {% for sem_label, rows in semesters.items() %}
+    {% set total_gp = namespace(val=0) %}
+    {% set total_cr = namespace(val=0) %}
+    {% for r in rows %}
+      {% set total_gp.val = total_gp.val + r.grade_point * r.credits %}
+      {% set total_cr.val = total_cr.val + r.credits %}
+    {% endfor %}
+    {% set sgpa = (total_gp.val / total_cr.val)|round(2) if total_cr.val else 0 %}
+
+    <div class="card mb-24">
+      <div class="card-header">
+        <h3>📋 {{ sem_label }}</h3>
+        <div class="flex gap-12">
+          <span class="text-muted text-sm">SGPA: <strong style="color:var(--accent)">{{ sgpa }}</strong></span>
+          <span class="text-muted text-sm">Credits: <strong>{{ total_cr.val }}</strong></span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Subject Code</th>
+              <th>Subject Name</th>
+              <th>Credits</th>
+              <th>Internal</th>
+              <th>External</th>
+              <th>Total</th>
+              <th>Grade</th>
+              <th>Grade Point</th>
+              <th>Exam Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+            <tr>
+              <td class="td-num">{{ loop.index }}</td>
+              <td class="text-mono">{{ r.subject_code }}</td>
+              <td><strong>{{ r.subject_name }}</strong></td>
+              <td class="td-num">{{ r.credits }}</td>
+              <td class="td-num">{{ r.internal_marks }}</td>
+              <td class="td-num">{{ r.external_marks }}</td>
+              <td class="td-num"><strong>{{ r.total_marks }}</strong></td>
+              <td><span class="grade-badge grade-{{ r.grade }}">{{ r.grade }}</span></td>
+              <td class="td-num">{{ r.grade_point }}</td>
+              <td class="text-muted text-sm">{{ r.exam_date or '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr style="background:var(--bg3);font-weight:700;">
+              <td colspan="3" style="padding:12px 14px;">Semester Totals</td>
+              <td class="td-num">{{ total_cr.val }}</td>
+              <td colspan="3"></td>
+              <td colspan="2" style="padding:12px 14px;color:var(--accent)">SGPA: {{ sgpa }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">📋</span>
+    <p>No semester results found yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Enter Semester Marks{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('enter_marks') }}" class="active">Enter Marks</a>
+  <a href="{{ url_for('assign_subjects') }}">Assign Subjects</a>
+  <a href="{{ url_for('manage_students') }}">Students</a>
+  <a href="{{ url_for('manage_faculty') }}">Faculty</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <p class="breadcrumb"><a href="{{ url_for('admin_dashboard') }}">Admin</a> / Enter Marks</p>
+    <h1>Enter Semester Marks</h1>
+    <p>Add or update student semester results</p>
+  </div>
+
+  <div class="card mb-24">
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+        <div class="form-group" style="margin:0">
+          <label>Student</label>
+          <select id="studentSelect" class="form-control">
+            <option value="">— Select Student —</option>
+            {% for s in students %}
+            <option value="{{ s.hallticket }}">{{ s.name }} ({{ s.hallticket }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Year</label>
+          <select id="yearSelect" class="form-control">
+            <option value="">— Year —</option>
+            {% for y in range(1,5) %}<option value="{{ y }}">Year {{ y }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Semester</label>
+          <select id="semesterSelect" class="form-control">
+            <option value="">— Semester —</option>
+            {% for s in range(1,3) %}<option value="{{ s }}">Semester {{ s }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveMsg" class="alert" style="display:none"></div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>📋 Marks Table</h3>
+      <div class="flex gap-8">
+        <button class="btn btn-ghost btn-sm" onclick="addRow()">+ Add Row</button>
+        <button id="saveBtn" class="btn btn-primary btn-sm" onclick="saveMarks()">💾 Save Results</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0">
+      <div class="table-wrap">
+        <table id="marksTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Subject Code</th>
+              <th>Subject Name</th>
+              <th>Credits</th>
+              <th>Internal (30)</th>
+              <th>External (70)</th>
+              <th>Total</th>
+              <th>Grade</th>
+              <th>GP</th>
+              <th>Exam Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="marksBody">
+            {% for i in range(6) %}
+            <tr>
+              <td class="td-num">{{ i+1 }}</td>
+              <td><input class="td-input inp-code" placeholder="CS301"/></td>
+              <td><input class="td-input inp-name" style="width:140px" placeholder="Subject Name"/></td>
+              <td><input class="td-input inp-credits" type="number" value="3" min="1" max="5" style="width:55px"/></td>
+              <td><input class="td-input inp-internal" type="number" placeholder="0" min="0" max="30" style="width:65px"/></td>
+              <td><input class="td-input inp-external" type="number" placeholder="0" min="0" max="70" style="width:65px"/></td>
+              <td><input class="td-input inp-total" type="number" readonly style="width:65px"/></td>
+              <td><input class="td-input inp-grade" readonly style="width:55px"/></td>
+              <td><input class="td-input inp-gp" type="number" readonly style="width:50px"/></td>
+              <td><input class="td-input inp-date" type="date"/></td>
+              <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">✕</button></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-16" style="background:rgba(79,142,247,.05);border-color:rgba(79,142,247,.2)">
+    <div class="card-body text-sm text-muted">
+      <strong style="color:var(--accent)">Grade Scale:</strong>
+      O (≥90, GP=10) · A+ (≥80, GP=9) · A (≥70, GP=8) · B+ (≥60, GP=7) · B (≥50, GP=6) · C (≥40, GP=5) · F (&lt;40, GP=0)
+    </div>
+  </div>
+</div>
+{% endblock %}

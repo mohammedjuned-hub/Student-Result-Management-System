@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% block title %}AI Backlog Assistant{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('student_dashboard') }}">Home</a>
+  <a href="{{ url_for('student_mid_marks') }}">MID Marks</a>
+  <a href="{{ url_for('student_results') }}">Results</a>
+  <a href="{{ url_for('student_backlogs') }}">Backlogs</a>
+  <a href="{{ url_for('student_ranking') }}">Ranking</a>
+  <a href="{{ url_for('backlog_assistant') }}" class="active">🤖 AI Assistant</a>
+  <a href="{{ url_for('student_change_password') }}">Password</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <p class="breadcrumb"><a href="{{ url_for('student_dashboard') }}">Home</a> / AI Backlog Assistant</p>
+    <h1>🤖 AI Backlog Assistant</h1>
+    <p>Intelligent study planning powered by smart algorithms</p>
+  </div>
+
+  {% if not backlogs %}
+  <div class="empty-state">
+    <span class="empty-icon">🎉</span>
+    <p style="font-size:1.1rem;font-weight:700;color:var(--green)">No Backlogs Found!</p>
+    <p>You're clear — no subjects with grade F. Keep it up!</p>
+    <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary mt-16">Go to Dashboard</a>
+  </div>
+  {% else %}
+
+  <!-- Configuration Panel -->
+  <div class="card mb-24">
+    <div class="card-header">
+      <h3>⚙️ Study Plan Configuration</h3>
+    </div>
+    <div class="card-body">
+      <!-- Backlog subject selector -->
+      <div class="mb-24">
+        <label style="font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:12px;">
+          Select Backlog Subjects
+        </label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;">
+          {% for b in backlogs %}
+          <label style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .18s;">
+            <input type="checkbox" class="backlog-check"
+              data-code="{{ b.subject_code }}"
+              data-name="{{ b.subject_name }}"
+              data-marks="{{ b.total_marks }}"
+              checked
+              style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;"/>
+            <div>
+              <div style="font-weight:600;font-size:.9rem;">{{ b.subject_name }}</div>
+              <div style="font-size:.78rem;color:var(--muted);">
+                {{ b.subject_code }} &nbsp;·&nbsp; Score: <strong style="color:var(--red)">{{ b.total_marks }}</strong>
+                &nbsp;·&nbsp; Year {{ b.year }} Sem {{ b.semester }}
+              </div>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Study params -->
+      <div class="ai-config">
+        <div class="form-group" style="margin:0">
+          <label>Study Hours / Day</label>
+          <select id="studyHours" class="form-control">
+            <option value="2">2 hours</option>
+            <option value="3">3 hours</option>
+            <option value="4" selected>4 hours</option>
+            <option value="5">5 hours</option>
+            <option value="6">6 hours</option>
+            <option value="8">8 hours</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Number of Days</label>
+          <select id="numDays" class="form-control">
+            <option value="5">5 days</option>
+            <option value="7" selected>7 days</option>
+            <option value="10">10 days</option>
+            <option value="14">14 days</option>
+            <option value="21">21 days</option>
+            <option value="30">30 days</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Preferred Study Time</label>
+          <select id="preferredTime" class="form-control">
+            <option value="morning">🌅 Morning (6–10 AM)</option>
+            <option value="afternoon">☀️ Afternoon (12–4 PM)</option>
+            <option value="evening">🌆 Evening (4–8 PM)</option>
+            <option value="night">🌙 Night (8 PM–12 AM)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="planMsg" class="alert" style="display:none;margin-top:16px;"></div>
+
+      <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;">
+        <button id="generateBtn" class="btn btn-primary" onclick="generatePlan()">
+          🤖 Generate Study Plan
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('planResult').style.display='none'">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="planLoading" style="display:none;text-align:center;padding:40px">
+    <div class="spinner"></div>
+    <p style="margin-top:16px;color:var(--muted)">Generating your personalized study plan…</p>
+  </div>
+
+  <!-- Plan Result -->
+  <div id="planResult" style="display:none">
+
+    <!-- Motivation banner -->
+    <div id="motivationWrap" style="display:none" class="motivation-banner mb-24">
+      💬 <span id="motivation"></span>
+    </div>
+
+    <!-- Priority Analysis -->
+    <div class="card mb-24">
+      <div class="card-header">
+        <h3>🎯 Priority Analysis</h3>
+        <span class="text-muted text-sm">Weak subjects get more time</span>
+      </div>
+      <div id="priorityTable" class="table-wrap"></div>
+    </div>
+
+    <!-- Timetable -->
+    <div class="card mb-24">
+      <div class="card-header">
+        <h3>📅 Study Timetable</h3>
+        <div class="flex gap-8">
+          <button class="btn btn-ghost btn-sm no-print" onclick="downloadTimetable()">🖨️ Print / Download PDF</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="timetableGrid" class="timetable-grid"></div>
+
+        <!-- Progress tracker -->
+        <div id="progressSection" style="margin-top:24px">
+          <h4 style="font-size:.9rem;font-weight:700;margin-bottom:12px;color:var(--muted)">✅ DAILY PROGRESS TRACKER</h4>
+          <div id="progressChecks" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Learning Resources -->
+    <div class="card mb-24">
+      <div class="card-header">
+        <h3>📚 Learning Resources</h3>
+        <span class="text-muted text-sm">Curated per subject</span>
+      </div>
+      <div class="card-body">
+        <div id="resourcesGrid" class="resources-grid"></div>
+      </div>
+    </div>
+
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+// Override renderPlan to also build progress tracker
+const _origRenderPlan = window.renderPlan;
+function renderPlan(data) {
+  // Call original from main.js
+  const ttEl = document.getElementById('timetableGrid');
+  if (ttEl) {
+    ttEl.innerHTML = data.timetable.map(day => `
+      <div class="day-card">
+        <div class="day-title">Day ${day.day} · ${day.date}</div>
+        ${day.slots.map(s => `
+          <div class="day-slot">
+            <span class="slot-name">${s.subject}</span>
+            <span class="slot-hrs">${s.hours}h</span>
+          </div>
+        `).join('')}
+        <div style="font-size:.75rem;color:var(--muted);margin-top:8px;">☕ ${day.break_time}</div>
+      </div>
+    `).join('');
+  }
+
+  // Resources
+  const resEl = document.getElementById('resourcesGrid');
+  if (resEl) {
+    resEl.innerHTML = Object.entries(data.resources).map(([subj, links]) => `
+      <div class="resource-card">
+        <h4>${subj}</h4>
+        ${links.map(l => `
+          <a href="${l.url}" target="_blank" class="resource-link">
+            <span class="res-type">${l.type}</span>
+            <span>${l.title}</span>
+          </a>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  // Priority table
+  const priEl = document.getElementById('priorityTable');
+  if (priEl) {
+    const sorted = [...data.backlogs].sort((a,b) => a.marks - b.marks);
+    priEl.innerHTML = `<table>
+      <thead><tr><th>Subject</th><th>Score</th><th>Hours Allocated</th><th>Priority</th></tr></thead>
+      <tbody>${sorted.map((b, i) => `
+        <tr>
+          <td><strong>${b.subject_name}</strong></td>
+          <td class="td-num" style="color:var(--red)">${b.marks}</td>
+          <td class="td-num">${b.hours_allocated}h</td>
+          <td>${i===0
+            ? '<span class="priority-badge">🔴 HIGH</span>'
+            : i===1
+            ? '<span style="background:rgba(245,136,74,.15);color:var(--orange);padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700;">🟡 MEDIUM</span>'
+            : '<span style="background:rgba(79,142,247,.15);color:var(--accent);padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700;">🔵 LOW</span>'}</td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  }
+
+  // Motivation
+  const motEl = document.getElementById('motivation');
+  const motWrap = document.getElementById('motivationWrap');
+  if (motEl && data.motivation) {
+    motEl.textContent = data.motivation;
+    motWrap.style.display = 'block';
+  }
+
+  // Progress tracker checkboxes
+  const pc = document.getElementById('progressChecks');
+  if (pc) {
+    pc.innerHTML = data.timetable.map(day => `
+      <label style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:.82rem;">
+        <input type="checkbox" style="accent-color:var(--green)" onchange="this.closest('label').style.textDecoration=this.checked?'line-through':'none';this.closest('label').style.opacity=this.checked?'.5':'1'"/>
+        Day ${day.day} · ${day.date}
+      </label>
+    `).join('');
+  }
+}
+</script>
+{% endblock %}

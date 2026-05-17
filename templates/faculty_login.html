@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Faculty Login{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<div class="login-wrap">
+  <div class="login-card">
+    <span class="login-icon">👨‍🏫</span>
+    <h2>Faculty Portal</h2>
+    <p class="subtitle">Sign in with your faculty credentials</p>
+
+    {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+
+    <form method="POST">
+      <div class="form-group">
+        <label>Faculty ID</label>
+        <input name="faculty_id" class="form-control" placeholder="F001" required autofocus/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input name="password" type="password" class="form-control" placeholder="••••••••" required/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Sign In →</button>
+    </form>
+    <p class="text-center text-sm text-muted mt-16">
+      Default password = Faculty ID &nbsp;·&nbsp; <a href="/">← Home</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

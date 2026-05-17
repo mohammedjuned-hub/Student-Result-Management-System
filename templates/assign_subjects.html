@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Assign Subjects{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('enter_marks') }}">Enter Marks</a>
+  <a href="{{ url_for('assign_subjects') }}" class="active">Assign Subjects</a>
+  <a href="{{ url_for('manage_students') }}">Students</a>
+  <a href="{{ url_for('manage_faculty') }}">Faculty</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <p class="breadcrumb"><a href="{{ url_for('admin_dashboard') }}">Admin</a> / Assign Subjects</p>
+    <h1>Assign Subjects to Faculty</h1>
+  </div>
+
+  {% if msg %}<div class="alert alert-{{ msg[0] }}">{{ msg[1] }}</div>{% endif %}
+
+  <div style="display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start;">
+    <div class="card">
+      <div class="card-header"><h3>➕ New Assignment</h3></div>
+      <div class="card-body">
+        <form method="POST">
+          <div class="form-group">
+            <label>Faculty</label>
+            <select name="faculty_id" class="form-control" required>
+              <option value="">— Select Faculty —</option>
+              {% for f in faculty %}
+              <option value="{{ f.faculty_id }}">{{ f.name }} ({{ f.faculty_id }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Subject Code</label>
+            <input name="subject_code" class="form-control text-mono" placeholder="CS301" required/>
+          </div>
+          <div class="form-group">
+            <label>Subject Name</label>
+            <input name="subject_name" class="form-control" placeholder="Data Structures" required/>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label>Year</label>
+              <select name="year" class="form-control" required>
+                {% for y in range(1,5) %}<option value="{{ y }}">Year {{ y }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Semester</label>
+              <select name="semester" class="form-control" required>
+                <option value="1">Sem 1</option>
+                <option value="2">Sem 2</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block">Assign Subject</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3>📋 Current Assignments</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Faculty</th><th>Subject Code</th><th>Subject Name</th><th>Year</th><th>Semester</th></tr></thead>
+          <tbody>
+            {% for a in assignments %}
+            <tr>
+              <td class="td-num">{{ loop.index }}</td>
+              <td><strong>{{ a.faculty_name }}</strong><br/><span class="text-muted text-sm">{{ a.faculty_id }}</span></td>
+              <td class="text-mono">{{ a.subject_code }}</td>
+              <td>{{ a.subject_name }}</td>
+              <td class="td-num">{{ a.year }}</td>
+              <td class="td-num">{{ a.semester }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6"><div class="empty-state"><span class="empty-icon">📭</span><p>No assignments yet</p></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

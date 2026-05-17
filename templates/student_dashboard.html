@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('student_dashboard') }}" class="active">Home</a>
+  <a href="{{ url_for('student_mid_marks') }}">MID Marks</a>
+  <a href="{{ url_for('student_results') }}">Results</a>
+  <a href="{{ url_for('student_backlogs') }}">Backlogs</a>
+  <a href="{{ url_for('student_ranking') }}">Ranking</a>
+  <a href="{{ url_for('backlog_assistant') }}">🤖 AI Assistant</a>
+  <a href="{{ url_for('student_change_password') }}">Password</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <h1>Welcome, {{ session.user }} 👋</h1>
+    <p class="text-mono text-muted">{{ session.hallticket }}</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-blue">
+      <div class="stat-label">SGPA (Latest Sem)</div>
+      <div class="stat-value">{{ sgpa }}</div>
+      <div class="stat-sub">Semester GPA</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="stat-label">CGPA</div>
+      <div class="stat-value">{{ cgpa }}</div>
+      <div class="stat-sub">Cumulative GPA</div>
+    </div>
+    <div class="stat-card stat-purple">
+      <div class="stat-label">Total Credits</div>
+      <div class="stat-value">{{ total_credits }}</div>
+      <div class="stat-sub">This semester</div>
+    </div>
+    <div class="stat-card stat-orange">
+      <div class="stat-label">Gained Credits</div>
+      <div class="stat-value">{{ gained_credits }}</div>
+      <div class="stat-sub">Passed subjects</div>
+    </div>
+    <div class="stat-card {% if backlogs %}stat-yellow{% else %}stat-green{% endif %}">
+      <div class="stat-label">Backlogs</div>
+      <div class="stat-value">{{ backlogs|length }}</div>
+      <div class="stat-sub">Subjects to clear</div>
+    </div>
+  </div>
+
+  {% if backlogs %}
+  <div class="alert alert-error flex flex-between">
+    <span>⚠️ You have {{ backlogs|length }} backlog(s). Use the AI Assistant to create a study plan!</span>
+    <a href="{{ url_for('backlog_assistant') }}" class="btn btn-danger btn-sm">🤖 Get Help</a>
+  </div>
+  {% endif %}
+
+  <!-- Semester-wise SGPA -->
+  {% if sgpa_data %}
+  <div class="card mb-24">
+    <div class="card-header"><h3>📊 Semester Performance</h3></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Year</th><th>Semester</th><th>SGPA</th><th>Progress</th></tr></thead>
+        <tbody>
+          {% for key, gpa in sgpa_data.items() %}
+          <tr>
+            <td>Year {{ key[0] }}</td>
+            <td>Semester {{ key[1] }}</td>
+            <td class="td-num"><strong>{{ gpa }}</strong> / 10</td>
+            <td style="width:200px">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:{{ (gpa/10*100)|round }}%"></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Latest semester results preview -->
+  {% if latest_key and semesters.get(latest_key) %}
+  <div class="card">
+    <div class="card-header">
+      <h3>📋 Latest Results · Year {{ latest_key[0] }} Sem {{ latest_key[1] }}</h3>
+      <a href="{{ url_for('student_results') }}" class="btn btn-ghost btn-sm">View All →</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Subject</th><th>Internal</th><th>External</th><th>Total</th><th>Grade</th><th>GP</th></tr></thead>
+        <tbody>
+          {% for r in semesters[latest_key] %}
+          <tr>
+            <td><strong>{{ r.subject_name }}</strong><br/><span class="text-muted text-sm text-mono">{{ r.subject_code }}</span></td>
+            <td class="td-num">{{ r.internal_marks }}</td>
+            <td class="td-num">{{ r.external_marks }}</td>
+            <td class="td-num"><strong>{{ r.total_marks }}</strong></td>
+            <td><span class="grade-badge grade-{{ r.grade }}">{{ r.grade }}</span></td>
+            <td class="td-num">{{ r.grade_point }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">📋</span>
+    <p>No results available yet. Check back after exams!</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

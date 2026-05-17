@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-badge">Academic Management Platform</span>
+    <h1>Student Result<br/><span>Management System</span></h1>
+    <p>A unified platform for students, faculty, and administrators to manage academic records, results, and performance analytics.</p>
+    <div class="portal-cards">
+      <a href="{{ url_for('admin_login') }}" class="portal-card" style="border-color:rgba(240,96,96,.2)">
+        <span class="icon">🛡️</span>
+        <h3>Admin Portal</h3>
+        <p>Manage marks, students & faculty</p>
+      </a>
+      <a href="{{ url_for('faculty_login') }}" class="portal-card" style="border-color:rgba(79,142,247,.2)">
+        <span class="icon">👨‍🏫</span>
+        <h3>Faculty Portal</h3>
+        <p>Enter internal & MID marks</p>
+      </a>
+      <a href="{{ url_for('student_login') }}" class="portal-card" style="border-color:rgba(62,207,142,.2)">
+        <span class="icon">🎓</span>
+        <h3>Student Portal</h3>
+        <p>View results, GPA & AI assistant</p>
+      </a>
+    </div>
+    <p class="text-muted text-sm mt-16">
+      <a href="/init_db" style="color:var(--muted);font-size:.8rem;">Initialize Database (first run only)</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

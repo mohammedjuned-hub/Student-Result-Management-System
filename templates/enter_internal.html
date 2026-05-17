@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Enter MID-{{ mid }} Marks{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('faculty_dashboard') }}">Dashboard</a>
+  <a href="{{ url_for('faculty_change_password') }}">Password</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <p class="breadcrumb"><a href="{{ url_for('faculty_dashboard') }}">Dashboard</a> / Enter Marks</p>
+    <h1>Enter MID-{{ mid }} Marks</h1>
+    {% if subject %}<p>{{ subject.subject_name }} · {{ subject.subject_code }}</p>{% endif %}
+  </div>
+
+  {% if msg %}<div class="alert alert-{{ msg[0] }}">{{ msg[1] }}</div>{% endif %}
+
+  <div class="card">
+    <div class="card-header">
+      <h3>📝 MID-{{ mid }} Marks Entry</h3>
+      <div class="flex gap-8">
+        <a href="{{ url_for('enter_internal', subject_code=subject_code, mid=1) }}" class="btn btn-ghost btn-sm {% if mid == '1' %}btn-accent2{% endif %}">MID-1</a>
+        <a href="{{ url_for('enter_internal', subject_code=subject_code, mid=2) }}" class="btn btn-ghost btn-sm {% if mid == '2' %}btn-success{% endif %}">MID-2</a>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0">
+      <form method="POST">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Hall Ticket</th>
+                <th>Student Name</th>
+                <th>Exam (25)</th>
+                <th>Assignment (5)</th>
+                <th>PPT (5)</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in students %}
+              {% set m = marks_map.get(s.hallticket, {}) %}
+              <tr>
+                <td class="td-num">{{ loop.index }}</td>
+                <td class="text-mono">{{ s.hallticket }}</td>
+                <td><strong>{{ s.name }}</strong></td>
+                {% if mid == '1' %}
+                <td><input class="td-input mid-exam" name="mid1_exam_{{ s.hallticket }}" type="number" min="0" max="25" value="{{ m.get('mid1_exam', '') }}" placeholder="0" style="width:70px"/></td>
+                <td><input class="td-input mid-assign" name="mid1_assign_{{ s.hallticket }}" type="number" min="0" max="5" value="{{ m.get('mid1_assignment', '') }}" placeholder="0" style="width:70px"/></td>
+                <td><input class="td-input mid-ppt" name="mid1_ppt_{{ s.hallticket }}" type="number" min="0" max="5" value="{{ m.get('mid1_ppt', '') }}" placeholder="0" style="width:70px"/></td>
+                {% else %}
+                <td><input class="td-input mid-exam" name="mid2_exam_{{ s.hallticket }}" type="number" min="0" max="25" value="{{ m.get('mid2_exam', '') }}" placeholder="0" style="width:70px"/></td>
+                <td><input class="td-input mid-assign" name="mid2_assign_{{ s.hallticket }}" type="number" min="0" max="5" value="{{ m.get('mid2_assignment', '') }}" placeholder="0" style="width:70px"/></td>
+                <td><input class="td-input mid-ppt" name="mid2_ppt_{{ s.hallticket }}" type="number" min="0" max="5" value="{{ m.get('mid2_ppt', '') }}" placeholder="0" style="width:70px"/></td>
+                {% endif %}
+                <td class="td-num mid-total">—</td>
+              </tr>
+              {% else %}
+              <tr><td colspan="7"><div class="empty-state"><span class="empty-icon">🎓</span><p>No students found</p></div></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:16px 24px;border-top:1px solid var(--border)">
+          <button class="btn btn-primary">💾 Save MID-{{ mid }} Marks</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('tbody tr').forEach(tr => {
+  function updateTotal() {
+    const exam   = parseFloat(tr.querySelector('.mid-exam')?.value)   || 0;
+    const assign = parseFloat(tr.querySelector('.mid-assign')?.value) || 0;
+    const ppt    = parseFloat(tr.querySelector('.mid-ppt')?.value)    || 0;
+    const totEl  = tr.querySelector('.mid-total');
+    if (totEl) totEl.textContent = exam + assign + ppt;
+  }
+  tr.querySelectorAll('.mid-exam,.mid-assign,.mid-ppt').forEach(inp =>
+    inp.addEventListener('input', updateTotal)
+  );
+  updateTotal();
+});
+</script>
+{% endblock %}

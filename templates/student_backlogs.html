@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Backlogs{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('student_dashboard') }}">Home</a>
+  <a href="{{ url_for('student_mid_marks') }}">MID Marks</a>
+  <a href="{{ url_for('student_results') }}">Results</a>
+  <a href="{{ url_for('student_backlogs') }}" class="active">Backlogs</a>
+  <a href="{{ url_for('student_ranking') }}">Ranking</a>
+  <a href="{{ url_for('backlog_assistant') }}">🤖 AI Assistant</a>
+  <a href="{{ url_for('student_change_password') }}">Password</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <p class="breadcrumb"><a href="{{ url_for('student_dashboard') }}">Home</a> / Backlogs</p>
+    <h1>Backlog Subjects</h1>
+    <p>Subjects with grade F — need to clear</p>
+  </div>
+
+  {% if backlogs %}
+  <div class="alert alert-error mb-24">
+    ⚠️ You have <strong>{{ backlogs|length }}</strong> backlog subject(s).
+    <a href="{{ url_for('backlog_assistant') }}" style="color:var(--red);text-decoration:underline;margin-left:8px;">Get AI Study Plan →</a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>📌 Backlog Details</h3>
+      <span style="background:rgba(240,96,96,.15);color:var(--red);padding:4px 12px;border-radius:8px;font-size:.82rem;font-weight:700;">
+        {{ backlogs|length }} Subject(s)
+      </span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Subject Code</th>
+            <th>Subject Name</th>
+            <th>Year</th>
+            <th>Semester</th>
+            <th>Internal</th>
+            <th>External</th>
+            <th>Total</th>
+            <th>Grade</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in backlogs %}
+          <tr>
+            <td class="td-num">{{ loop.index }}</td>
+            <td class="text-mono">{{ b.subject_code }}</td>
+            <td><strong>{{ b.subject_name }}</strong></td>
+            <td class="td-num">{{ b.year }}</td>
+            <td class="td-num">{{ b.semester }}</td>
+            <td class="td-num">{{ b.internal_marks }}</td>
+            <td class="td-num">{{ b.external_marks }}</td>
+            <td class="td-num"><strong>{{ b.total_marks }}</strong></td>
+            <td><span class="grade-badge grade-F">F</span></td>
+            <td>
+              <span style="background:rgba(240,96,96,.1);color:var(--red);padding:3px 10px;border-radius:6px;font-size:.78rem;font-weight:600;">
+                Needs Clearance
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-24" style="background:linear-gradient(135deg,rgba(79,142,247,.05),rgba(124,92,252,.05));border-color:rgba(79,142,247,.2)">
+    <div class="card-body text-center">
+      <p style="font-size:1.1rem;font-weight:700;margin-bottom:8px;">Need help clearing your backlogs?</p>
+      <p class="text-muted mb-16">Our AI Assistant will create a personalized study plan with timetable, resources, and priority analysis.</p>
+      <a href="{{ url_for('backlog_assistant') }}" class="btn btn-primary">🤖 Launch AI Backlog Assistant</a>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">🎉</span>
+    <p style="font-size:1.1rem;font-weight:600;color:var(--green)">Congratulations!</p>
+    <p>You have no backlogs. Keep up the great work!</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

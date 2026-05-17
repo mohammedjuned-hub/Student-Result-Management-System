@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Faculty Dashboard{% endblock %}
+{% block nav_links %}
+  <a href="{{ url_for('faculty_dashboard') }}" class="active">Dashboard</a>
+  <a href="{{ url_for('faculty_change_password') }}">Password</a>
+  <a href="{{ url_for('logout') }}" class="logout">Logout</a>
+{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="page-header">
+    <h1>Faculty Dashboard</h1>
+    <p>Welcome, <strong>{{ session.user }}</strong> · {{ session.faculty_id }}</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-blue">
+      <div class="stat-label">Assigned Subjects</div>
+      <div class="stat-value">{{ subjects|length }}</div>
+    </div>
+  </div>
+
+  {% if subjects %}
+  <div class="card">
+    <div class="card-header"><h3>📚 Your Subjects</h3></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Subject Code</th><th>Subject Name</th><th>Year</th><th>Sem</th><th>Actions</th></tr></thead>
+        <tbody>
+          {% for s in subjects %}
+          <tr>
+            <td class="td-num">{{ loop.index }}</td>
+            <td class="text-mono"><strong>{{ s.subject_code }}</strong></td>
+            <td>{{ s.subject_name }}</td>
+            <td class="td-num">{{ s.year }}</td>
+            <td class="td-num">{{ s.semester }}</td>
+            <td>
+              <div class="flex gap-8">
+                <a href="{{ url_for('enter_internal', subject_code=s.subject_code, mid=1) }}" class="btn btn-accent2 btn-sm">MID-1</a>
+                <a href="{{ url_for('enter_internal', subject_code=s.subject_code, mid=2) }}" class="btn btn-success btn-sm">MID-2</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon">📚</span>
+    <p>No subjects assigned yet. Contact the admin.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
